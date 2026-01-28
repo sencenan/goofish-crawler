@@ -2,6 +2,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { URL } from 'node:url';
 
+import filenamify from 'filenamify';
 import puppeteer from 'puppeteer';
 import EasyDl from 'easydl';
 
@@ -49,9 +50,10 @@ const processPage = async (browser, url) => {
 
   const parsedURL = URL.parse(url);
 
-  const title = (await page.title()).replace(/_闲鱼$/, '');
-  const desc = await page.$eval('[class^="main--"] [class^="desc"]', e => e.textContent);
-  const seller = await page.$eval('[class^="item-user-info-nick--"]', e => e.textContent);
+  const title = (await page.title()).replace(/_闲鱼$/, '').trim();
+  const desc = (await page.$eval('[class^="main--"] [class^="desc"]', e => e.textContent)).trim();
+  const seller = (await page.$eval('[class^="item-user-info-nick--"]', e => e.textContent)).trim();
+  const price = (await page.$eval('[class^="value--"] [class^="price--"]', e => e.textContent)).trim();
   const id = parsedURL.searchParams.get('id');
 
   const videoUrls = [...new Set(await page.$$eval('video source', xs => xs.map(s => s.getAttribute('src'))))];
@@ -59,26 +61,31 @@ const processPage = async (browser, url) => {
     'img.ant-image-img',
     xs => xs
       .map(s => s.getAttribute('src'))
-      .map(s => s.startsWith('//') ? parsedURL.protocol + s : s)
-  ))];
+  ))].map(s => s.startsWith('//') ? parsedURL.protocol + s : s);
 
   const metadata = `
 ID: ${id}
 TITLE: ${title}
 SELLER: ${seller}
-PRICE:
+PRICE: ${price}
 
 DESC:
 ${desc}
+
+IMAGES:
+${imageUrls}
+
+VIDEOS:
+${videoUrls}
   `;
 
-  console.log('id', id);
-  console.log('title', title);
-  console.log('seller', seller);
-  console.log('videoUrls', videoUrls);
-  console.log('imageUrls', imageUrls);
+  // console.log('id', id);
+  // console.log('title', title);
+  // console.log('seller', seller);
+  // console.log('videoUrls', videoUrls);
+  // console.log('imageUrls', imageUrls);
 
-  const dirName = `./contents/${seller}-${title}`;
+  const dirName = `./contents/${filenamify(`${seller}-${title}`)}`;
   fs.mkdirSync(dirName, { recursive: true });
   fs.writeFileSync(`${dirName}/metadata.txt`, metadata);
 
@@ -97,6 +104,7 @@ for (const page of PAGES) {
   console.log("Start processing", page);
   await processPage(browser, page);
   console.log("Finished processing", page);
+  await new Promise(r => setTimeout(r, 2000)); // wait
 }
 
 await browser.close();
