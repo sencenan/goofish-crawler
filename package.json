@@ -10,8 +10,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "easydl": "^1.2.0",
     "filenamify": "^7.0.1",
+    "nodejs-file-downloader": "^4.13.0",
     "puppeteer": "^24.36.0"
   }
 }

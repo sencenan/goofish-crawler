@@ -4,12 +4,17 @@ import { URL } from 'node:url';
 
 import filenamify from 'filenamify';
 import puppeteer from 'puppeteer';
-import EasyDl from 'easydl';
+
+import { Downloader } from 'nodejs-file-downloader';
 
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36';
 
-const PAGES = [
-];
+const ITEM_IDS = JSON.parse(fs.readFileSync("./items.json"));
+
+// already ran 5 + 46
+// 46 + 39 = 85
+// 85 -> 86
+const PAGES = ITEM_IDS.map(it => `https://www.goofish.com/item?id=${it}`).slice(86);
 
 const downloadVideo = async (dir, videoUrl) => {
   try {
@@ -18,11 +23,14 @@ const downloadVideo = async (dir, videoUrl) => {
       basename += '.mp4';
     }
 
-    await new EasyDl(
-      videoUrl,
-      `./${dir}/${basename}`,
-      { connections: 5, maxRetry: 5 }
-    ).wait();
+    const downloader = new Downloader({
+      url: videoUrl,
+      directory: dir,
+      fileName: basename,
+      cloneFiles: false,
+    });
+
+    await downloader.download();
   } catch (err) {
     console.log("[error downloading video]", videoUrl, err);
   }
@@ -31,11 +39,15 @@ const downloadVideo = async (dir, videoUrl) => {
 const downloadImage = async (dir, imageUrl) => {
   try {
     const basename = path.basename(URL.parse(imageUrl).pathname);
-    await new EasyDl(
-      imageUrl,
-      `./${dir}/${basename}`,
-      { connections: 1, maxRetry: 1 }
-    ).wait();
+
+    const downloader = new Downloader({
+      url: imageUrl,
+      directory: dir,
+      fileName: basename,
+      cloneFiles: false,
+    });
+
+    await downloader.download();
   } catch (err) {
     console.log("[error downloading image]", imageUrl, err);
   }
@@ -45,8 +57,12 @@ const processPage = async (browser, url) => {
   const page = await browser.newPage();
   await page.setUserAgent({ userAgent: USER_AGENT });
   await page.goto(url);
-  await page.waitForSelector('video');
-  await page.waitForSelector('iframe');
+  
+  try {
+    await page.waitForSelector('video', { timeout: 5000 });
+  } catch (_) {
+    console.log('Error while waiting for video');
+  }
 
   const parsedURL = URL.parse(url);
 
@@ -91,6 +107,7 @@ ${videoUrls}
 
   await page.close();
 
+  console.log(`Process downloads for ${seller}-${title}`);
   return Promise.all(
     imageUrls.map(u => downloadImage(dirName, u)).concat(
       videoUrls.map(u => downloadVideo(dirName, u))
@@ -100,11 +117,22 @@ ${videoUrls}
 
 const browser = await puppeteer.launch();
 
+console.log(`total ${PAGES.length} pages`)
+
+let index = 0;
 for (const page of PAGES) {
-  console.log("Start processing", page);
-  await processPage(browser, page);
+  console.log(`[${index}] Start processing`, page);
+  
+  try {
+    await processPage(browser, page);
+  } catch(ex) {
+    console.log("Cannot download", page);
+  }
+
   console.log("Finished processing", page);
+
   await new Promise(r => setTimeout(r, 2000)); // wait
+  index += 1;
 }
 
 await browser.close();
