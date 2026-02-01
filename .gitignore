@@ -1,3 +1,5 @@
 node_modules
 contents
 items.json
+
+.DS_Store
