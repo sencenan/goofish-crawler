@@ -90,6 +90,7 @@ const downloadImage = async (dir, imageUrl) => {
 const processPage = async (browser, url) => {
   const page = await browser.newPage();
   await page.setUserAgent({ userAgent: USER_AGENT });
+  
   await page.goto(url);
   await page.waitForNetworkIdle({
     concurrency: 1,
@@ -102,10 +103,11 @@ const processPage = async (browser, url) => {
   // } catch (_) {
   //   console.log('Error while waiting for video');
   // }
+  // await new Promise(r => setTimeout(r, 2000)); // wait
 
   const isDeleted = (await page.$$eval('[class^="empty-container--"]', xs => xs.length > 0));
   if (isDeleted) {
-    console.log(`${url} DELETED`);
+    console.log(`DELETED ${url} was DELETED`);
     return;
   }
 
@@ -165,9 +167,25 @@ ${videoUrls}
   });
 };
 
+const userDataDir = '/Users/xianshiwu/Library/Application Support/Google/Chrome for Testing';
 let index = 0;
+
 while (true) {
-  let browser = await puppeteer.launch();
+  let browser;
+
+  if (process.argv[2]) {
+    console.log('OVERRIDE pages from cli argv');
+    PAGES = [process.argv[2]];
+    browser = await puppeteer.launch({
+      headless: false,
+      devtools: true,
+      userDataDir
+    });
+  } else {
+    browser = await puppeteer.launch({
+      userDataDir
+    });
+  }
 
   console.log(`total ${PAGES.length} pages`)
 
