@@ -1,4 +1,5 @@
 - get HAR from browser
+    - filter "mtop.idle.web.trade.bought.list"
 - save data as DATA, and run script to get item ids
 ```js
 DATA.log.entries.filter(it => it.response.status == 200 && it.request.url.indexOf("mtop.idle.web.trade.bought.list") >= 0).map(it => JSON.parse(it.response.content.text)).flatMap(it => it.data.items).map(x=>x.commonData.itemId)
@@ -27,3 +28,5 @@ DATA.log.entries.filter(it => it.response.status == 200 && it.request.url.indexO
 1. open terminal
 2. input `cd ~/ws/goofish-crawler` enter
 3. input `node index.js '<URL>'` enter
+
+## need to login to download large amount of ids
