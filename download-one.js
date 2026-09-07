@@ -15,7 +15,7 @@ if (!itemId) {
 }
 
 if (isDownloaded(itemId)) {
-  console.log(`${itemId} already downloaded`);
+  console.log(`ALREADY DOWNLOADED`);
   process.exit(0);
 }
 
@@ -48,6 +48,7 @@ const isDeleted = await page.$$eval('[class^="empty-container--"]', (xs) => xs.l
 if (isDeleted) {
   await writeDeletedMeta(itemId);
   await page.close();
+  await browser.close();
   console.log(`ITEM IS DELETED`);
   process.exit(1);
 }
@@ -85,7 +86,6 @@ console.table({id, title, seller});
 await page.close();
 
 const dirName = `${CONTENT_DIR}/${filenamify(`${seller}-${title}-${id}`)}`;
-await writeMeta(dirName, metadata);
 
 console.log(`DOWNLOADING FILES TO ${dirName} :`);
 
@@ -118,13 +118,20 @@ await Promise.all(
     return fn(dirName, url, (percentage, chunk, remainingSize) => {
       if (!bars[filename]) {
         bars[filename] = multibar.create(remainingSize, 0);
-      } else {
+      }
+
+      if (bars[filename].isActive) {
         bars[filename].increment(chunk.length, { filename });
       }
     });
   })
 );
 
-console.log("");
-await browser.close();
 multibar.stop();
+
+console.log("\nWRITE META");
+await writeMeta(dirName, metadata);
+
+await browser.close();
+
+console.log(`SUCCESS!: ${itemId} \n\n`);
