@@ -10,8 +10,14 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "cli-progress": "^3.12.0",
     "filenamify": "^7.0.1",
     "nodejs-file-downloader": "^4.13.0",
-    "puppeteer": "^24.36.0"
+    "puppeteer": "^24.43.1",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.12"
   }
 }
