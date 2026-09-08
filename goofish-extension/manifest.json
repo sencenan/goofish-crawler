@@ -1,0 +1,27 @@
+{
+  "name": "Goofish Extensions",
+  "description": "Base Level Extension",
+  "version": "1.0",
+  "manifest_version": 3,
+  "permissions": ["webRequest"],
+  "host_permissions": [
+    "*://www.goofish.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/table.png",
+      "24": "icons/table.png",
+      "32": "icons/table.png"
+    }
+  },
+  "content_scripts": [
+    {
+        "matches": [
+            "*://www.goofish.com/bought*"
+        ],
+        "js": ["scripts/listener.js"],
+        "run_at": "document_end"
+    }
+  ]
+}
