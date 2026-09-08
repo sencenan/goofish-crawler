@@ -1,0 +1,6 @@
+{
+  "manifest_version": 3,
+  "name": "Goofish Data Exporter",
+  "version": "1.0",
+  "devtools_page": "devtools.html"
+}
