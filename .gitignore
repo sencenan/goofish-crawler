@@ -5,3 +5,5 @@ items.json
 items-list-archive
 
 .DS_Store
+
+*.zip

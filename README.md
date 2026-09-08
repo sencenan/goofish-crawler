@@ -19,3 +19,11 @@
 - copy in "./run.sh" ENTER
     - make sure to use the slider when prompted
     - leave it running
+
+# HOW TO INSTALL EXTENSION
+- open chrome
+- Type chrome://extensions in your address bar and press Enter.Enable Developer Mode:
+- Turn on the “开发者模式” (Developer mode) toggle switch at the top-right corner of the page.Load the Extension
+- Click the “加载已解压的扩展程序” (Load unpacked) button that appears at the top-left.Select Folder
+- Choose the unzipped folder containing your extension's manifest.json file. (the zipped folder)
+
