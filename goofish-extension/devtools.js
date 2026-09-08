@@ -15,7 +15,7 @@ const install = async () => {
 
   const panel = await chrome.devtools.panels.create(
     "Goofish Data Exporter",
-    "icon.png",
+    "icons/fish.png",
     "panel.html"
   );
 
